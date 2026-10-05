@@ -1,0 +1,8 @@
+{
+  "python_version": "3.13",
+  "dependencies": ["."],
+  "graphs": {
+    "coding_agent": "./src/coding_agent/graph.py:graph"
+  },
+  "env": ".env"
+}

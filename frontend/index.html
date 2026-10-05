@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,560&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main id="home" class="home">
+    <header class="home-head">
+      <p class="mark">Studio</p>
+      <p class="mark-note">One workspace per client, with as many projects as you need</p>
+    </header>
+    <form id="new-client" class="new-client">
+      <label for="client-name">New client</label>
+      <div class="new-client-row">
+        <input id="client-name" name="name" type="text" maxlength="80" placeholder="Acme" autocomplete="off" required>
+        <button type="submit">Add</button>
+      </div>
+      <p id="client-error" class="form-error" hidden></p>
+    </form>
+    <nav aria-label="Clients">
+      <ul id="client-list" class="client-list"></ul>
+    </nav>
+    <p id="home-empty" class="mark-note">Add a client to open their workspace.</p>
+  </main>
+
+  <main id="workspace" class="sheet" hidden>
+    <a class="back" data-nav href="/">Clients</a>
+    <p class="mark-note">Workspace</p>
+    <h1 id="client-title"></h1>
+    <form id="rename-form" class="rename-form">
+      <label for="workspace-name">Title</label>
+      <input id="workspace-name" type="text" maxlength="80" autocomplete="off" required>
+      <button type="submit">Save title</button>
+      <p id="rename-error" class="form-error" hidden></p>
+    </form>
+    <p id="client-path" class="path"></p>
+    <a id="open-projects" class="next" data-nav href="/">Projects</a>
+    <div id="workspace-missing" class="missing" hidden>
+      <h1>That workspace is not on this studio.</h1>
+      <a class="back" data-nav href="/">Back to clients</a>
+    </div>
+  </main>
+
+  <main id="projects" class="sheet" hidden>
+    <a id="projects-back" class="back" data-nav href="/">Workspace</a>
+    <p class="mark-note">Projects</p>
+    <h1 id="projects-title"></h1>
+    <form id="new-project" class="new-project">
+      <label for="project-name">New project</label>
+      <div class="new-client-row">
+        <input id="project-name" type="text" maxlength="80" placeholder="Spring poster" autocomplete="off" required>
+        <button type="submit">Add</button>
+      </div>
+      <p id="project-error" class="form-error" hidden></p>
+    </form>
+    <div id="project-list" class="project-grid"></div>
+    <p id="projects-empty" class="mark-note">Add a project to start.</p>
+    <div id="projects-missing" class="missing" hidden>
+      <h1>That workspace is not on this studio.</h1>
+      <a class="back" data-nav href="/">Back to clients</a>
+    </div>
+  </main>
+
+  <main id="editor" class="workspace" hidden>
+    <header class="workspace-bar">
+      <div class="workspace-title">
+        <a id="editor-back" class="back" data-nav href="/">Projects</a>
+        <h1 id="editor-title"></h1>
+        <p id="editor-path" class="path"></p>
+      </div>
+    </header>
+
+    <div id="editor-missing" class="missing" hidden>
+      <h1>That project is not in this workspace.</h1>
+      <a id="editor-missing-back" class="back" data-nav href="/">Back to projects</a>
+    </div>
+
+    <div id="workspace-body" class="workspace-body">
+      <section class="chat" aria-label="Campaign chat">
+        <div id="messages" class="messages"></div>
+        <form id="composer" class="composer">
+          <label for="prompt">Ask for a page, poster, or campaign</label>
+          <textarea id="prompt" rows="4" placeholder="A landing page for the spring launch, with a hero and a signup block."></textarea>
+          <div class="composer-row">
+            <p class="hint">The agent edits the open project, then the preview reloads.</p>
+            <button type="submit">Send</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="preview" aria-label="Site preview">
+        <div class="browser">
+          <div class="browser-top">
+            <span class="dots" aria-hidden="true"></span>
+            <p id="preview-url" class="url"></p>
+            <div class="browser-actions">
+              <button type="button" id="width-desktop" aria-pressed="true">Desktop</button>
+              <button type="button" id="width-mobile" aria-pressed="false">Mobile</button>
+              <button type="button" id="reload">Reload</button>
+            </div>
+          </div>
+          <div id="frame-wrap" class="frame-wrap">
+            <iframe id="preview" title="Client site preview"></iframe>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>
