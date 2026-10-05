@@ -125,10 +125,10 @@ textarea { resize: vertical; min-height: 110px; }
   top: 0;
   z-index: 2;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 18px 24px 14px;
+  padding: 8px 16px;
   background: rgba(18, 17, 14, 0.94);
   border-bottom: 1px solid var(--line);
 }
@@ -230,9 +230,23 @@ textarea { resize: vertical; min-height: 110px; }
   padding: 10px 16px;
 }
 
-.workspace-title { min-width: 0; }
+.workspace-title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+}
 
-.workspace-bar h1, .missing h1 {
+.workspace-bar h1 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.workspace-bar .path { margin: 0; font-size: 13px; }
+
+.missing h1 {
   margin: 6px 0 0;
   font-family: Fraunces, Georgia, serif;
   font-weight: 560;
@@ -437,7 +451,8 @@ button:disabled, textarea:disabled { opacity: 0.55; cursor: wait; }
 
 @media (max-width: 900px) {
   .mark, .sheet h1 { font-size: 42px; }
-  .workspace-bar h1 { font-size: 32px; }
+  .workspace-bar h1 { font-size: 16px; }
+  .workspace-title { flex-wrap: wrap; }
   .project-bar { align-items: stretch; min-width: 0; }
   .project-list { justify-content: flex-start; }
   .rename-form input, .new-project input { width: 100%; }

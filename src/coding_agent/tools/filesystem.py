@@ -85,13 +85,6 @@ def build_filesystem_tools(workspace: Workspace):
 
     @tool
     def edit_file(path: str, old_text: str, new_text: str) -> str:
-        """Replace one exact occurrence of old_text with new_text in a file.
-
-        Args:
-            path: File path relative to the workspace.
-            old_text: Exact text to find. Must appear once.
-            new_text: Replacement text.
-        """
         try:
             target = workspace.resolve(path)
         except WorkspaceError as exc:
