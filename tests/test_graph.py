@@ -14,6 +14,14 @@ def test_gpt5_tools_use_the_responses_api():
     assert "use_responses_api" not in model_kwargs("openai:gpt-4.1")
 
 
+def test_ollama_keeps_a_page_sized_context():
+    kwargs = model_kwargs("ollama:qwen3.5:9b")
+    assert kwargs["reasoning"] is False
+    assert kwargs["num_ctx"] == 32768
+    assert kwargs["num_predict"] == -1
+    assert "num_ctx" not in model_kwargs("openai:gpt-4.1")
+
+
 def test_resolve_model_defaults_to_openai(monkeypatch):
     monkeypatch.delenv("MODEL", raising=False)
     assert resolve_model() == "openai:gpt-6-sol"

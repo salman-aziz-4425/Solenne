@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import threading
 from collections.abc import Iterator
 from pathlib import Path
@@ -19,6 +20,48 @@ def message_text(message: Any) -> str:
             block.get("text", "") if isinstance(block, dict) else str(block) for block in content
         )
     return str(content or "")
+
+
+_PAGE = re.compile(r"(<!DOCTYPE html\b.*?</html>)", re.IGNORECASE | re.DOTALL)
+
+
+def page_from_reply(text: str) -> str | None:
+    """A reply that is mostly a finished HTML document, which should be the site."""
+    match = _PAGE.search(text)
+    if match is None:
+        return None
+    html = match.group(1).strip()
+    if len(html) < 400 or len(html) < len(text) * 0.5:
+        return None
+    return html
+
+
+def _saved_index(message: Any) -> bool:
+    return (
+        isinstance(message, ToolMessage)
+        and getattr(message, "name", "") in {"write_file", "edit_file"}
+        and "index.html" in message_text(message)
+    )
+
+
+def _events_for(site: Path, message: Any, wrote_page: bool) -> tuple[bool, list[dict[str, str]]]:
+    """Turn one model message into the events the page should show."""
+    if _saved_index(message):
+        wrote_page = True
+    payload = message_event(message)
+    if payload is None:
+        return wrote_page, []
+    html = None
+    if payload["type"] == "assistant" and not wrote_page:
+        html = page_from_reply(payload["text"])
+    if html is None:
+        return wrote_page, [payload]
+    (site / "index.html").write_text(html + "\n", encoding="utf-8")
+    lines = html.count("\n") + 1
+    return True, [
+        {"type": "tool", "text": f"write_file\nWrote index.html ({lines} lines)"},
+        {"type": "assistant", "text": "Saved the page to index.html. The preview is updated."},
+    ]
 
 
 def message_event(message: Any) -> dict[str, str] | None:
@@ -73,7 +116,8 @@ class SiteAgents:
             f"Client: {client_name}. Project: {label}. The preview shows this project's index.html.\n"
             "Edit only this project folder.\n"
             "If this is a question or casual talk, answer in text and do not call tools. "
-            "Call tools only when they ask you to change this project.\n\n"
+            "When they ask you to change this project, save index.html with write_file or edit_file. "
+            "Do not paste the page into the reply.\n\n"
             f"{text}"
         )
         config = {
@@ -82,6 +126,7 @@ class SiteAgents:
         }
         with lock:
             seen: set[str] = set()
+            wrote_page = False
             try:
                 for event in graph.stream(
                     {"messages": [HumanMessage(content=prompt)]},
@@ -89,13 +134,12 @@ class SiteAgents:
                     stream_mode="values",
                 ):
                     message = event["messages"][-1]
-                    key = getattr(message, "id", None) or str(id(message))
-                    if key in seen:
+                    marker = getattr(message, "id", None) or str(id(message))
+                    if marker in seen:
                         continue
-                    seen.add(key)
-                    payload = message_event(message)
-                    if payload:
-                        yield payload
+                    seen.add(marker)
+                    wrote_page, payloads = _events_for(site, message, wrote_page)
+                    yield from payloads
             except Exception as exc:
                 yield {"type": "error", "text": str(exc)}
                 return

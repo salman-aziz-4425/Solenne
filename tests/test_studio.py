@@ -9,7 +9,7 @@ from langchain_core.messages import AIMessage, ToolMessage
 
 from coding_agent.clients import create_client, create_project, delete_project, list_clients, rename_client, rename_project
 from coding_agent.prompts import STUDIO_PROMPT
-from coding_agent.studio import message_event
+from coding_agent.studio import SiteAgents, message_event, page_from_reply
 from coding_agent.web import make_handler
 
 
@@ -61,6 +61,29 @@ def test_preview_stays_inside_the_client_site(tmp_path: Path):
 
 def test_studio_answers_questions_without_tools():
     assert "Do not call any tool" in STUDIO_PROMPT
+
+
+def test_a_finished_page_in_the_reply_is_saved(tmp_path: Path, monkeypatch):
+    body = "<p>" + ("Los Santos operations. " * 40) + "</p>"
+    page = f"<!DOCTYPE html><html><head><title>Solenne</title></head><body>{body}</body></html>"
+    reply = f"Here is the complete page:\n```html\n{page}\n```"
+
+    class _Graph:
+        def stream(self, *_args, **_kwargs):
+            yield {"messages": [AIMessage(content=reply)]}
+
+    monkeypatch.setattr("coding_agent.studio.compile_agent", lambda **_kwargs: _Graph())
+    events = list(SiteAgents().stream("acme", "Acme", tmp_path, "rebuild the landing page"))
+    saved = (tmp_path / "index.html").read_text(encoding="utf-8")
+    assert saved.startswith("<!DOCTYPE html>")
+    assert "Los Santos operations." in saved
+    assert any(event["type"] == "tool" and "index.html" in event["text"] for event in events)
+    assert "<!DOCTYPE html>" not in next(event["text"] for event in events if event["type"] == "assistant")
+
+
+def test_a_short_html_example_stays_in_the_chat():
+    snippet = "<!DOCTYPE html><html><body>hi</body></html>"
+    assert page_from_reply(f"A tiny example is {snippet}. " + ("word " * 40)) is None
 
 
 def test_message_event_reports_tools_and_the_answer():

@@ -30,6 +30,10 @@ def model_kwargs(model_name: str) -> dict[str, Any]:
     """gpt-5 and gpt-6 tool calls must use the responses API, not chat completions."""
     bare = model_name.split(":", 1)[-1]
     kwargs: dict[str, Any] = {}
+    if model_name.startswith("ollama:"):
+        kwargs["reasoning"] = False
+        kwargs["num_ctx"] = 32768
+        kwargs["num_predict"] = -1
     if not bare.startswith("gpt-6"):
         kwargs["temperature"] = 0
     if bare.startswith(("gpt-5", "gpt-6")):

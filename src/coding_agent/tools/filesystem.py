@@ -85,6 +85,13 @@ def build_filesystem_tools(workspace: Workspace):
 
     @tool
     def edit_file(path: str, old_text: str, new_text: str) -> str:
+        """Replace one unique passage in a workspace file.
+
+        Args:
+            path: File path relative to the workspace.
+            old_text: Exact text to replace. It must appear once.
+            new_text: Text to write in its place.
+        """
         try:
             target = workspace.resolve(path)
         except WorkspaceError as exc:

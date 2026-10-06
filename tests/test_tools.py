@@ -1,18 +1,15 @@
 from pathlib import Path
 
+import pytest
+
 from coding_agent.tools.filesystem import build_filesystem_tools
 from coding_agent.tools.shell import build_shell_tool
 from coding_agent.workspace import Workspace, WorkspaceError
 
 
 def test_workspace_blocks_escape(tmp_path: Path):
-    ws = Workspace(tmp_path)
-    try:
-        ws.resolve("../secret.txt")
-        raised = False
-    except WorkspaceError:
-        raised = True
-    assert raised
+    with pytest.raises(WorkspaceError):
+        Workspace(tmp_path).resolve("../secret.txt")
 
 
 def test_write_read_edit_and_grep(tmp_path: Path):

@@ -65,33 +65,27 @@ def make_handler(clients_root: Path, frontend_root: Path, agents: SiteAgents | N
             self._json(404, {"error": "Not found"})
 
         def do_POST(self) -> None:
-            path = urlparse(self.path).path
-            parts = [unquote(part) for part in path.split("/") if part]
-            if path == "/api/clients":
+            parts = [unquote(part) for part in urlparse(self.path).path.split("/") if part]
+            client_id = parts[2] if len(parts) > 2 else ""
+            if parts == ["api", "clients"]:
                 self._create_client()
                 return
-            if len(parts) == 4 and parts[:2] == ["api", "clients"] and is_client_id(parts[2]):
-                if parts[3] == "run":
-                    self._run_agent(parts[2])
+            if len(parts) == 4 and parts[:2] == ["api", "clients"] and is_client_id(client_id):
+                action = {"run": self._run_agent, "rename": self._rename_client, "projects": self._create_project}
+                if handler := action.get(parts[3]):
+                    handler(client_id)
                     return
-                if parts[3] == "rename":
-                    self._rename_client(parts[2])
-                    return
-                if parts[3] == "projects":
-                    self._create_project(parts[2])
-                    return
+            project_id = parts[4] if len(parts) > 4 else ""
             if (
                 len(parts) == 6
                 and parts[:2] == ["api", "clients"]
                 and parts[3] == "projects"
-                and is_client_id(parts[2])
-                and is_client_id(parts[4])
+                and is_client_id(client_id)
+                and is_client_id(project_id)
             ):
-                if parts[5] == "rename":
-                    self._rename_project(parts[2], parts[4])
-                    return
-                if parts[5] == "delete":
-                    self._delete_project(parts[2], parts[4])
+                action = {"rename": self._rename_project, "delete": self._delete_project}
+                if handler := action.get(parts[5]):
+                    handler(client_id, project_id)
                     return
             self._json(404, {"error": "Not found"})
 
