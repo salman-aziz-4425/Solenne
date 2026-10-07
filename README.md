@@ -1,5 +1,8 @@
 # Solenne
 
+<img width="2300" height="1470" alt="image" src="https://github.com/user-attachments/assets/0fb17540-b324-41b9-92c0-5cac0ac38502" />
+
+
 A private studio for client work. Each client gets a workspace. Each workspace holds as many projects as you need. Open a project, and a coding agent edits only that folder while you watch the page update beside the chat.
 
 ```
