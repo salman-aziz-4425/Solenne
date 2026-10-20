@@ -11,12 +11,10 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_WORKSPACE = PROJECT_ROOT / "workspace"
 
 
-DEFAULT_MODEL = "openai:gpt-6-sol"
+DEFAULT_MODEL = "openai:gpt-6-luna"
 
 
 def resolve_model() -> str:
-    if explicit := os.getenv("MODEL"):
-        return explicit
     return DEFAULT_MODEL
 
 
